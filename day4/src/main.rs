@@ -43,9 +43,13 @@ fn main() -> Result<()> {
             }
         }
     }
-    if let Some((id, times)) = records.records.iter().max_by_key(|&(_, times)| times.iter().len()) {
-        println!("{:?}", (0 .. 60).max_by_key(|i| times.iter().filter(|&n| n == i).count()).map(|i| id.0 * i));
-    }
+
+    records.records.iter()
+        .map(|(id, times)| (id, frequently(times)))
+        .max_by_key(|(_, time_and_count)| time_and_count.map_or(0, |(_, count)| count))
+        .and_then(|(id, time_and_count)| time_and_count.map(|(time, _)| id.0 * time))
+        .map(|result| println!("{}", result));
+
     Ok(())
 }
 
@@ -58,4 +62,10 @@ fn parse(input: String) -> (DateTime<Utc>, String) {
 
 fn get_id(input: String) -> Option<u32> {
     input.split_whitespace().nth(1).unwrap().trim_start_matches("#").parse::<u32>().ok()
+}
+
+fn frequently(times: &Vec<u32>) -> Option<(u32, usize)> {
+    (0 .. 60)
+        .map(|i| (i, times.iter().filter(|&&n| n == i).count()))
+        .max_by_key(|&(_, count)| count)
 }
