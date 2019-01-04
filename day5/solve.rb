@@ -1,4 +1,5 @@
 input = open("./input.txt") {|f| f.read.chomp }
+#input = "dabAcCaCBAcCcaDA"
 
 re = Regexp.new(
   (?a..?z).flat_map {|c| [c, c.upcase] }
@@ -7,12 +8,16 @@ re = Regexp.new(
     .join("|")
 )
 
-loop do
-  new_str = input.gsub(re, "")
-  if input == new_str
-    break
-  end
-  input = new_str
-end
+p (?a..?z).map {|c|
+  str = input.gsub(/#{c}/i, "")
 
-p input.size
+  loop do
+    new_str = str.gsub(re, "")
+    if str == new_str
+      break
+    end
+    str = new_str
+  end
+
+  str.size
+}.min
